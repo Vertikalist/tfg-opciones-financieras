@@ -1,8 +1,8 @@
 import numpy as np
 import math
 from scipy.stats import norm
-from metodos import resolver_integral_fourier_heston, simular_monte_carlo_heston
-from datos_mercado import get_risk_free_rate
+from metodos_old import resolver_integral_fourier_heston, simular_monte_carlo_heston
+from datos_mercado_old import get_risk_free_rate
 
 class ModelosValoracion:
     def __init__(self,r):

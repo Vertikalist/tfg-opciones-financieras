@@ -1,8 +1,7 @@
 import numpy as np
 import scipy.integrate as integrate
 
-
-# METODOLOGÍA MÁTEMÁTICA 1: INTEGRACIÓN NUMÉRICA (FOURIER HESTON)
+# METODOLOGÍA MATEMÁTICA 1: INTEGRACIÓN NUMÉRICA (FOURIER HESTON)
 def char_func_heston(u, S, T, r, kappa, theta, xi, rho, v0, j):
     b = (kappa - rho * xi) if j == 1 else kappa
     f = 0.5 if j == 1 else -0.5
@@ -54,9 +53,45 @@ def simular_monte_carlo_heston(S, K, T, r, kappa, theta, xi, rho, v0, num_sim, n
         S_tray[:, t + 1] = S_tray[:, t] * np.exp(
             (r - 0.5 * v_positivo) * dt + np.sqrt(v_positivo) * dW1[:, t] * np.sqrt(dt)
         )
-        v_tray[:, t + 1] = v_prev + kappa * (theta - v_positivo) * dt + xi * np.sqrt(v_positivo) * dW2[:, t] * np.sqrt(
-            dt)
+        v_tray[:, t + 1] = v_prev + kappa * (theta - v_positivo) * dt + xi * np.sqrt(v_positivo) * dW2[:, t] * np.sqrt(dt)
 
     payoffs = np.maximum(S_tray[:, -1] - K, 0.0)
     return np.exp(-r * T) * np.mean(payoffs)
+
+
+def simular_monte_carlo_heston_stats(S, K, T, r, kappa, theta, xi, rho, v0, num_sim, num_pasos):
+    """
+    Igual que simular_monte_carlo_heston pero devuelve además el error estándar
+    de Monte Carlo (SE = desv. típica de los payoffs descontados / sqrt(N)),
+    útil para construir intervalos de confianza en el análisis de convergencia.
+
+    Devuelve: (precio, error_estandar)
+    """
+    dt = T / num_pasos
+
+    S_tray = np.zeros((num_sim, num_pasos + 1))
+    v_tray = np.zeros((num_sim, num_pasos + 1))
+    S_tray[:, 0] = S
+    v_tray[:, 0] = v0
+
+    np.random.seed(42)
+    Z1 = np.random.normal(0.0, 1.0, (num_sim, num_pasos))
+    Z2 = np.random.normal(0.0, 1.0, (num_sim, num_pasos))
+
+    dW1 = Z1
+    dW2 = rho * Z1 + np.sqrt(1.0 - rho ** 2) * Z2
+
+    for t in range(num_pasos):
+        v_prev = v_tray[:, t]
+        v_positivo = np.maximum(v_prev, 0.0)  # Full Truncation Scheme (Lord et al., 2010)
+
+        S_tray[:, t + 1] = S_tray[:, t] * np.exp(
+            (r - 0.5 * v_positivo) * dt + np.sqrt(v_positivo) * dW1[:, t] * np.sqrt(dt)
+        )
+        v_tray[:, t + 1] = v_prev + kappa * (theta - v_positivo) * dt + xi * np.sqrt(v_positivo) * dW2[:, t] * np.sqrt(dt)
+
+    payoffs_desc = np.exp(-r * T) * np.maximum(S_tray[:, -1] - K, 0.0)
+    precio = float(np.mean(payoffs_desc))
+    error_estandar = float(np.std(payoffs_desc, ddof=1) / np.sqrt(num_sim))
+    return precio, error_estandar
 

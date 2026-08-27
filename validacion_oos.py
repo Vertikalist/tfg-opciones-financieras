@@ -7,7 +7,7 @@ los parámetros obtenidos, sin reoptimizar, sobre el vencimiento T2
 ambos casos (misma sesión de mercado), esto equivale a testear si el
 modelo generaliza a un horizonte temporal distinto al calibrado.
 
-Uso desde main.py (añadir al final, tras las calibraciones):
+Uso desde main_old.py (añadir al final, tras las calibraciones):
     from validacion_oos import ejecutar_validacion_oos
     ejecutar_validacion_oos(S_mercado, T_mercado, calc,
                             res_bs, res_merton, res_heston)
@@ -194,7 +194,7 @@ def ejecutar_validacion_oos(S, T_insample, calc_model, res_bs, res_merton, res_h
       3. Imprime tabla comparativa RMSE / IV-RMSE
       4. Genera gráfico de precios y residuos
 
-    Llamar desde main.py tras las calibraciones:
+    Llamar desde main_old.py tras las calibraciones:
         ejecutar_validacion_oos(S_mercado, T_mercado, calc,
                                 res_bs, res_merton, res_heston)
     """
